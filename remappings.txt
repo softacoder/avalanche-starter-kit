@@ -3,6 +3,6 @@ forge-std/=lib/forge-std/src/
 
 @openzeppelin/contracts@4.8.1/=lib/openzeppelin-contracts/contracts/
 @avalabs/subnet-evm-contracts@1.2.0/=lib/teleporter/contracts/lib/subnet-evm/contracts/
-@teleporter/=lib/teleporter/contracts/src/Teleporter/
-@teleporter-mocks/=lib/teleporter/contracts/src/Mocks/
-@avalanche-interchain-token-transfer/=lib/avalanche-interchain-token-transfer/contracts/src/
+@teleporter/=lib/icm-contracts/contracts/teleporter/
+@teleporter-mocks/=lib/icm-contracts/contracts/mocks/
+@avalanche-interchain-token-transfer/=lib/icm-contracts/contracts/ictt/
