@@ -5,9 +5,7 @@
 	path = lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
 	branch = v4.8
-[submodule "lib/icm"]
-	path = lib/icm
+[submodule "lib/icm-contracts"]
+	path = lib/icm-contracts
 	url = https://github.com/ava-labs/icm-contracts
-[submodule "lib/ictt"]
-	path = lib/ictt
-	url = https://github.com/ava-labs/icm-contracts
+	branch = main
