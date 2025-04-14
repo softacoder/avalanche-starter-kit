@@ -5,9 +5,7 @@
 	path = lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
 	branch = v4.8
-[submodule "lib/teleporter"]
-	path = lib/teleporter
-	url = https://github.com/ava-labs/teleporter
-[submodule "lib/avalanche-interchain-token-transfer"]
-	path = lib/avalanche-interchain-token-transfer
-	url = https://github.com/ava-labs/avalanche-interchain-token-transfer
+[submodule "lib/icm-contracts"]
+	path = lib/icm-contracts
+	url = https://github.com/ava-labs/icm-contracts
+	branch = main
