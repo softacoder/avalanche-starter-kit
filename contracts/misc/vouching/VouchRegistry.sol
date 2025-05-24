@@ -1,167 +1,54 @@
-// // Define datastructures
-
-// struct Vouch {
-//     address voucher;
-//     uint256 timestamp;
-//     bool revoked;
-// }
-
-// mapping(address => Vouch[]) private vouchHistory;
-
-// // voucher => vouchee => bool (has vouched and not revoked)
-// mapping(address => mapping(address => bool)) private hasVouched;
-
-// // revoked vouches can be tracked within Vouch.revoked flag
-
-// // Track number of valid vouches for each person
-// mapping(address => uint256) public validVouchCount;
-
-// // Track the number of required vouches per new vouchee
-// mapping(address => uint256) public requiredVouches;
-
-// //Implement vounching logic
-// function vouch(address vouchee) external {
-//     require(vouchee != msg.sender, "Cannot vouch for yourself");
-//     require(!hasVouched[msg.sender][vouchee], "Already vouched for this person");
-
-//     // If it's the first time we see this vouchee, assign required vouches dynamically
-//     if (requiredVouches[vouchee] == 0) {
-//         // Calculate required vouches for new user based on number of people already vouched for
-//         // For example: requiredVouches = number of people already vouched + 1
-//         requiredVouches[vouchee] = getNextRequiredVouches();
-//     }
-
-//     // Register the vouch
-//     hasVouched[msg.sender][vouchee] = true;
-//     vouchHistory[vouchee].push(Vouch(msg.sender, block.timestamp, false));
-
-//     validVouchCount[vouchee]++;
-
-//     // Optionally emit event
-//     emit Vouched(msg.sender, vouchee, validVouchCount[vouchee], requiredVouches[vouchee]);
-// }
-
-// // Calculate required vouches dynamically based on number of people already vouched
-// function getNextRequiredVouches() internal view returns (uint256) {
-//     // For example, total number of unique vouchees so far:
-//     uint256 totalVouchees = totalVoucheesCount();
-//     // Threshold increases by 1 every new user after the first two
-//     if (totalVouchees < 2) {
-//         return 2; // first 2 users require 2 vouches
-//     }
-//     return totalVouchees + 1;
-// }
-
-// function totalVoucheesCount() public view returns (uint256) {
-//     // This requires tracking all vouchees in an array or set, which is not shown yet
-// }
-
-// // Implement Revoke Vouch
-// event VouchRevoked(address indexed voucher, address indexed vouchee);
-
-// function revokeVouch(address vouchee) external {
-//     require(hasVouched[msg.sender][vouchee], "No existing vouch found");
-
-//     Vouch[] storage vouches = vouchHistory[vouchee];
-//     bool found = false;
-
-//     // Find the vouch from msg.sender and revoke it
-//     for (uint256 i = 0; i < vouches.length; i++) {
-//         if (vouches[i].voucher == msg.sender && !vouches[i].revoked) {
-//             vouches[i].revoked = true;
-//             found = true;
-//             break;
-//         }
-//     }
-//     require(found, "Vouch already revoked or not found");
-
-//     hasVouched[msg.sender][vouchee] = false;
-//     validVouchCount[vouchee] = validVouchCount[vouchee] > 0 ? validVouchCount[vouchee] - 1 : 0;
-
-//     emit VouchRevoked(msg.sender, vouchee);
-// }
-
-// // Query Trust Score
-// function getTrustScore(address person) public view returns (uint256) {
-//     return validVouchCount[person];
-// }
-
-// // Get Vouch History
-// function getVouchHistory(address person) public view returns (Vouch[] memory) {
-//     return vouchHistory[person];
-// }
-
-// // Soulbound Token Integration (Basic Example)
-// // SPDX-License-Identifier: MIT
-// pragma solidity ^0.8.0;
-
-// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
-// contract SoulVouch is ERC721 {
-//     mapping(address => bool) public hasSoulVouch;
-
-//     constructor() ERC721("SoulVouch", "SVOUCH") {}
-
-//     function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
-//         require(from == address(0) || to == address(0), "SoulVouch: non-transferable");
-//         super._beforeTokenTransfer(from, to, tokenId);
-//     }
-
-//     function mintSoulVouch(address to) internal {
-//         require(!hasSoulVouch[to], "Already has soul vouch");
-//         uint256 tokenId = uint256(uint160(to)); // unique tokenId based on address
-//         _mint(to, tokenId);
-//         hasSoulVouch[to] = true;
-//     }
-// }
-
-// revie and debug later
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+// Using OpenZeppelin ERC721 & ERC721Enumerable
+import "openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
+import "openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-contract VouchRegistry is ERC721 {
+contract VouchRegistry is ERC721, ERC721Enumerable {
     struct Vouch {
         address voucher;
         uint256 timestamp;
         bool revoked;
     }
 
-    // voucher => vouchee => bool (has vouched and not revoked)
+    // Mapping to track if a voucher has vouched for a vouchee
     mapping(address => mapping(address => bool)) private hasVouched;
 
-    // vouchee => list of vouches
+    // Vouch history for each vouchee
     mapping(address => Vouch[]) private vouchHistory;
 
-    // person => number of valid vouches
+    // Valid (non-revoked) vouch counts
     mapping(address => uint256) public validVouchCount;
 
-    // person => how many vouches are required
+    // Required number of vouches for each person
     mapping(address => uint256) public requiredVouches;
 
-    // Track unique vouchees for calculating next required vouches
+    // Track unique vouchees and whether they're tracked
     address[] private voucheeList;
     mapping(address => bool) private isVoucheeTracked;
 
-    // Track who has received a SoulVouch token
+    // Tracks whether someone has received their SoulVouch NFT
     mapping(address => bool) public hasSoulVouch;
 
+    // Events
     event Vouched(address indexed voucher, address indexed vouchee, uint256 current, uint256 required);
     event VouchRevoked(address indexed voucher, address indexed vouchee);
 
     constructor() ERC721("SoulVouch", "SVOUCH") {}
 
+    /// @notice Vouch for someone, increasing their trust score
     function vouch(address vouchee) external {
         require(vouchee != msg.sender, "Cannot vouch for yourself");
         require(!hasVouched[msg.sender][vouchee], "Already vouched");
 
+        // Track vouchee
         if (!isVoucheeTracked[vouchee]) {
             voucheeList.push(vouchee);
             isVoucheeTracked[vouchee] = true;
         }
 
+        // Set required vouches if first time
         if (requiredVouches[vouchee] == 0) {
             requiredVouches[vouchee] = getNextRequiredVouches();
         }
@@ -177,6 +64,7 @@ contract VouchRegistry is ERC721 {
         }
     }
 
+    /// @notice Revoke a vouch
     function revokeVouch(address vouchee) external {
         require(hasVouched[msg.sender][vouchee], "No vouch to revoke");
 
@@ -202,36 +90,53 @@ contract VouchRegistry is ERC721 {
         emit VouchRevoked(msg.sender, vouchee);
     }
 
+    /// @notice Returns a person's current trust score
     function getTrustScore(address person) external view returns (uint256) {
         return validVouchCount[person];
     }
 
+    /// @notice Returns all vouches for a person
     function getVouchHistory(address person) external view returns (Vouch[] memory) {
         return vouchHistory[person];
     }
 
+    /// @dev Defines dynamic logic to increase required vouches
     function getNextRequiredVouches() internal view returns (uint256) {
         uint256 total = voucheeList.length;
-        if (total < 2) {
-            return 2;
-        }
-        return total + 1;
+        return total < 2 ? 2 : total + 1;
     }
 
+    /// @notice Total number of people who have been vouched for
     function totalVoucheesCount() external view returns (uint256) {
         return voucheeList.length;
     }
 
-    // Disable transfers to make SoulVouch non-transferable (soulbound)
-    function _beforeTokenTransfer(address from, address to, uint256 tokenId) internal virtual override {
-        require(from == address(0) || to == address(0), "SoulVouch: non-transferable");
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
-
+    /// @dev Mints a non-transferable SoulVouch NFT
     function mintSoulVouch(address to) internal {
         require(!hasSoulVouch[to], "Already has soul vouch");
-        uint256 tokenId = uint256(uint160(to));
+        uint256 tokenId = uint256(uint160(to)); // Deterministic tokenId
         _mint(to, tokenId);
         hasSoulVouch[to] = true;
+    }
+
+    /// @dev Makes SoulVouch non-transferable (soulbound)
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721, ERC721Enumerable)
+        returns (address)
+    {
+        address from = _ownerOf(tokenId);
+        require(from == address(0) || to == address(0), "SoulVouch: non-transferable");
+        return super._update(to, tokenId, auth);
+    }
+
+    /// @dev Required to resolve multiple inheritance
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// ✅ FIX: Override to resolve diamond inheritance from ERC721 & ERC721Enumerable
+    function _increaseBalance(address account, uint128 value) internal override(ERC721, ERC721Enumerable) {
+        ERC721Enumerable._increaseBalance(account, value);
     }
 }
