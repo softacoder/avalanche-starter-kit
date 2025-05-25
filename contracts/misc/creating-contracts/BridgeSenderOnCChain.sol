@@ -1,11 +1,8 @@
-// (c) 2023, Ava Labs, Inc. All rights reserved.
-// See the file LICENSE for licensing terms.
-
 // SPDX-License-Identifier: Ecosystem
+pragma solidity ^0.8.25; // Allow compiler versions 0.8.25 and above
 
-pragma solidity ^0.8.18;
-
-import "@teleporter/upgrades/TeleporterRegistry.sol";
+import "@teleporter/registry/TeleporterRegistry.sol";
+// import "@teleporter/upgrades/TeleporterRegistry.sol";
 import "@teleporter/ITeleporterMessenger.sol";
 import "./BridgeActions.sol";
 
@@ -27,7 +24,7 @@ contract ERC20MinterSenderOnCChain {
                 destinationAddress: destinationAddress,
                 feeInfo: TeleporterFeeInfo({feeTokenAddress: address(0), amount: 0}),
                 requiredGasLimit: 100000,
-                allowedRelayerAddresses: new address[](0),
+                allowedRelayerAddresses: new address,
                 message: encodeCreateTokenData(name, symbol)
             })
         );
@@ -42,13 +39,13 @@ contract ERC20MinterSenderOnCChain {
                 destinationAddress: destinationAddress,
                 feeInfo: TeleporterFeeInfo({feeTokenAddress: address(0), amount: 0}),
                 requiredGasLimit: 100000,
-                allowedRelayerAddresses: new address[](0),
+                allowedRelayerAddresses: new address,
                 message: encodeMintTokenData(to, amount)
             })
         );
     }
 
-    //Encode helpers
+    // Encode helpers
     function encodeCreateTokenData(string memory name, string memory symbol) public pure returns (bytes memory) {
         bytes memory paramsData = abi.encode(name, symbol);
         return abi.encode(BridgeAction.createToken, paramsData);

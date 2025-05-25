@@ -1,10 +1,3 @@
-[profile.default]
-src = "contracts"
-out = "out"
-libs = ["lib"]
-solc = "0.8.25"
-evm_version = "shanghai"
-
 [rpc_endpoints]
 local-c = "http://localhost:9650/ext/bc/C/rpc"
 myblockchain = "http://localhost:9650/ext/bc/myblockchain/rpc"
@@ -13,4 +6,25 @@ dispatch = "https://subnets.avax.network/dispatch/testnet/rpc"
 mysubnet = "http://localhost:9650/ext/bc/mysubnet/rpc"
 
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+[profile.default]
+solidity_version = "0.8.25"      # Specify the Solidity compiler version
+src = "contracts"                 # Source folder for contracts
+out = "out"                       # Output folder for compiled contracts
+libs = ["lib"]                    # Directory for external libraries
+evm_version = "shanghai"           # Specify the EVM version
+solc = "0.8.25"                   # Explicitly specify the Solidity compiler version
+
+remappings = [
+    "@chainlink/=lib/chainlink/contracts/",                     # Chainlink contracts
+    "@chainlink-evm=lib/chainlink-evm/contracts",                # Chainlink EVM contracts
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",  # OpenZeppelin contracts
+    "ds-test/=lib/forge-std/lib/ds-test/src/",                  # ds-test remapping
+    "forge-std/=lib/forge-std/src/"                              # forge-std remapping
+]
+
+[rpc_endpoints]
+local-c = "http://localhost:9650/ext/bc/C/rpc"                   # Local C chain RPC
+myblockchain = "http://localhost:9650/ext/bc/myblockchain/rpc"   # Custom blockchain RPC
+fuji-c = "https://api.avax-test.network/ext/bc/C/rpc"            # Fuji C chain RPC
+dispatch = "https://subnets.avax.network/dispatch/testnet/rpc"    # Dispatch testnet RPC
+mysubnet = "http://localhost:9650/ext/bc/mysubnet/rpc"            # Local subnet RPC

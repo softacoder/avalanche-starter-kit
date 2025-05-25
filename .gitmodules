@@ -9,3 +9,12 @@
 	path = lib/icm-contracts
 	url = https://github.com/ava-labs/icm-contracts
 	branch = main
+[submodule "lib/foundry-chainlink-toolkit"]
+	path = lib/foundry-chainlink-toolkit
+	url = https://github.com/smartcontractkit/foundry-chainlink-toolkit
+[submodule "lib/chainlink-evm"]
+	path = lib/chainlink-evm
+	url = https://github.com/smartcontractkit/chainlink-evm
+[submodule "lib/chainlink"]
+	path = lib/chainlink
+	url = https://github.com/smartcontractkit/chainlink

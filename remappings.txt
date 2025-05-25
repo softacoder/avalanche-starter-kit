@@ -1,8 +1,21 @@
+# Remap @ds-test and forge-std to the correct paths
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 
-@openzeppelin/contracts@4.8.1/=lib/openzeppelin-contracts/contracts/
+# OpenZeppelin contracts
+@openzeppelin/contracts@5.3.1/=lib/openzeppelin-contracts/contracts/
+
+# Avalanche subnet contracts
 @avalabs/subnet-evm-contracts@1.2.0=lib/icm-contracts/lib/subnet-evm/contracts/
+
+# Teleporter contracts
 @teleporter/=lib/icm-contracts/contracts/teleporter/
+
+# Mocks for Teleporter contracts
 @teleporter-mocks/=lib/icm-contracts/contracts/mocks/
+
+# Avalanche interchain token transfer contracts
 @avalanche-interchain-token-transfer/=lib/icm-contracts/contracts/ictt/
+
+# Chainlink contracts
+@chainlink=lib/chainlink-brownie-contracts/contracts/src
